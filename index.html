@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chalak Suvidha</title>
+    <link rel="stylesheet" href="index.css">
+    
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Chalak Suvidha</h2>
+            <ul class="contact-list">
+                <li><button id="rtoBtn">Contact local RTO</button></li>
+                <li><button id="mukhiyaBtn">Contact local Mukhiya</button></li>
+                <li><button id="advocateBtn">Contact local Advocate</button></li>
+                <li><button id="policeBtn">Contact local Police Station</button></li>
+                <li><button id="truckBtn">Contact local Truck Associations</button></li>
+                <li><button id="starlinkBtn">StarLink</button></li> <!-- New StarLink button -->
+            </ul>
+        </div>
+        <div class="content">
+            <header>
+                <h1>Chalak Suvidha</h1>
+                <p>Your One-Stop Solution for Logistics Transportation</p>
+                <img src="header-image.jpg" alt="Chalak Suvidha Banner" class="header-image">
+                <nav>
+                    <button id="vahanSuvidhaBtn">VAHAN SUVIDHA</button>
+                    <button id="sarathiBtn">SARATHI</button> <!-- SARATHI Button -->
+                    <button id="fastag-button">FASTag</button>
+                    <button id="locationBtn">Detect My Location</button> <!-- New Detect My Location button -->
+                </nav>
+            </header>
+
+            <main>
+                <!-- FASTag section -->
+                <div id="fastagSection" style="display:none;">
+                    <!-- Parking Fee Payment -->
+                    <section id="parking-fee">
+                        <h2>Parking Fee Payment</h2>
+                        <p>Pay your parking fees conveniently through FASTag. Use your FASTag balance for cashless parking fee payments at select parking lots.</p>
+                        <div id="parking-fee-data"></div> <!-- Placeholder for real-time data -->
+                    </section>
+                    
+                    <!-- Fuel Payment -->
+                    <section id="fuel-payment">
+                        <h2>Fuel Payment</h2>
+                        <form id="fuel-form">
+                            <label for="fuelAmount">Fuel Amount:</label>
+                            <input type="text" id="fuelAmount" name="fuelAmount" required><br><br>
+                            <button type="submit">Pay for Fuel</button>
+                        </form>
+                    </section>
+                    
+                    <!-- E-Challan Payment -->
+                    <section id="e-challan">
+                        <h2>E-Challan Payment</h2>
+                        <form id="challan-form">
+                            <label for="challanNumber">Challan Number:</label>
+                            <input type="text" id="challanNumber" name="challanNumber" required><br><br>
+                            <button type="submit">Pay E-Challan</button>
+                        </form>
+                    </section>
+                    
+                    <!-- Vehicle Tracking -->
+                    <section id="vehicle-tracking">
+                        <h2>Vehicle Tracking</h2>
+                        <p>Track your vehicle in real-time using FASTag technology.</p>
+                        <div id="vehicle-location"></div> <!-- Placeholder for vehicle tracking info -->
+                    </section>
+                    
+                    <!-- Time-Saving -->
+                    <section id="time-saving">
+                        <h2>Time-Saving</h2>
+                        <p>FASTag significantly reduces your waiting time at toll plazas by enabling fast, automatic payments.</p>
+                    </section>
+                    
+                    <!-- Convenience -->
+                    <section id="convenience">
+                        <h2>Convenience</h2>
+                        <p>Enjoy the convenience of cashless transactions for toll payments, fuel, parking, and more with FASTag.</p>
+                    </section>
+                </div>
+
+                <!-- VAHAN SUVIDHA sections, hidden initially -->
+                <div id="vahanForms" style="display:none;">
+                    <!-- Insurance Form -->
+                    <section id="insurance-section">
+                        <h2>Insurance Companies: Vehicle Details Verification</h2>
+                        <form id="insurance-form">
+                            <label for="regNumber">Vehicle Registration Number:</label>
+                            <input type="text" id="regNumber" name="regNumber" required><br><br>
+
+                            <label for="ownerName">Owner's Name:</label>
+                            <input type="text" id="ownerName" name="ownerName" required><br><br>
+
+                            <label for="vehicleModel">Vehicle Model:</label>
+                            <input type="text" id="vehicleModel" name="vehicleModel" required><br><br>
+
+                            <label for="policyNumber">Insurance Policy Number:</label>
+                            <input type="text" id="policyNumber" name="policyNumber" required><br><br>
+
+                            <button type="submit">Verify</button>
+                        </form>
+                    </section>
+
+                    <!-- Financial Institutions Form -->
+                    <section id="finance-section">
+                        <h2>Financial Institutions: Ownership Details Check</h2>
+                        <form id="finance-form">
+                            <label for="loanNumber">Loan Application Number:</label>
+                            <input type="text" id="loanNumber" name="loanNumber" required><br><br>
+
+                            <label for="regNumber">Vehicle Registration Number:</label>
+                            <input type="text" id="regNumber" name="regNumber" required><br><br>
+
+                            <label for="ownerDetails">Owner's Details:</label>
+                            <textarea id="ownerDetails" name="ownerDetails" required></textarea><br><br>
+
+                            <button type="submit">Check Ownership</button>
+                        </form>
+                    </section>
+
+                    <!-- Vehicle Leasing and Rental Services Form -->
+                    <section id="rental-section">
+                        <h2>Vehicle Leasing and Rental Services: Document Upload</h2>
+                        <form id="rental-form" enctype="multipart/form-data">
+                            <label for="agreementNumber">Rental Agreement Number:</label>
+                            <input type="text" id="agreementNumber" name="agreementNumber" required><br><br>
+
+                            <label for="regNumber">Vehicle Registration Number:</label>
+                            <input type="text" id="regNumber" name="regNumber" required><br><br>
+
+                            <label for="uploadDocs">Upload Agreement Document:</label>
+                            <input type="file" id="uploadDocs" name="uploadDocs" required><br><br>
+
+                            <button type="submit">Upload & Verify</button>
+                        </form>
+                    </section>
+
+                    <!-- E-Commerce Platforms Form -->
+                    <section id="ecommerce-section">
+                        <h2>E-Commerce Platforms: Vehicle Listing Verification</h2>
+                        <form id="ecommerce-form">
+                            <label for="listingID">Listing ID:</label>
+                            <input type="text" id="listingID" name="listingID" required><br><br>
+
+                            <label for="regNumber">Vehicle Registration Number:</label>
+                            <input type="text" id="regNumber" name="regNumber" required><br><br>
+
+                            <label for="sellerInfo">Seller Information:</label>
+                            <textarea id="sellerInfo" name="sellerInfo" required></textarea><br><br>
+
+                            <button type="submit">Verify Listing</button>
+                        </form>
+                    </section>
+
+                    <!-- Law Enforcement Agencies Form -->
+                    <section id="law-section">
+                        <h2>Law Enforcement: Vehicle Investigation Interface</h2>
+                        <form id="law-form">
+                            <label for="caseNumber">Case Number:</label>
+                            <input type="text" id="caseNumber" name="caseNumber" required><br><br>
+
+                            <label for="regNumber">Vehicle Registration Number:</label>
+                            <input type="text" id="regNumber" name="regNumber" required><br><br>
+
+                            <label for="ownerDetails">Owner's Details:</label>
+                            <textarea id="ownerDetails" name="ownerDetails" required></textarea><br><br>
+
+                            <button type="submit">Get Vehicle Info</button>
+                        </form>
+                    </section>
+
+                    <!-- Manufacturers/Dealers Form -->
+                    <section id="dealer-section">
+                        <h2>Vehicle Manufacturers/Dealers: Registration System</h2>
+                        <form id="dealer-form">
+                            <label for="dealerID">Manufacturer/Dealer ID:</label>
+                            <input type="text" id="dealerID" name="dealerID" required><br><br>
+
+                            <label for="vehicleModel">Vehicle Model:</label>
+                            <input type="text" id="vehicleModel" name="vehicleModel" required><br><br>
+
+                            <label for="regDetails">Registration Details:</label>
+                            <textarea id="regDetails" name="regDetails" required></textarea><br><br>
+
+                            <button type="submit">Register Vehicle</button>
+                        </form>
+                    </section>
+                </div>
+
+                <!-- SARATHI Sections, hidden initially -->
+                <div id="sarathiSections" style="display:none;">
+                    <!-- Freight Transport Data Access -->
+                    <section id="freightTransport">
+                        <h2>Freight Transport Data Access</h2>
+                        <p>Access real-time freight transport data to stay updated with the latest logistics information.</p>
+                        <div id="freightData">
+                            <p>Loading freight transport data...</p>
+                        </div>
+                    </section>
+
+                    <!-- Vehicle Permit Renewal -->
+                    <section id="permitRenewal">
+                        <h2>Vehicle Permit Renewal</h2>
+                        <form id="permitForm">
+                            <label for="permitNumber">Permit Number:</label>
+                            <input type="text" id="permitNumber" name="permitNumber" required><br><br>
+
+                            <label for="vehicleReg">Vehicle Registration Number:</label>
+                            <input type="text" id="vehicleReg" name="vehicleReg" required><br><br>
+
+                            <button type="submit">Renew Permit</button>
+                        </form>
+                    </section>
+
+                    <!-- E-Payment Portal -->
+                    <section id="ePayment">
+                        <h2>E-Payment Portal</h2>
+                        <form id="paymentForm">
+                            <label for="cardNumber">Card Number:</label>
+                            <input type="text" id="cardNumber" name="cardNumber" required><br><br>
+
+                            <label for="expiryDate">Expiry Date:</label>
+                            <input type="date" id="expiryDate" name="expiryDate" required><br><br>
+
+                            <label for="cvv">CVV:</label>
+                            <input type="password" id="cvv" name="cvv" required><br><br>
+
+                            <button type="submit">Make Payment</button>
+                        </form>
+                    </section>
+                </div>
+
+                <!-- Advocate Data Section -->
+                <div id="advocateDataSection" style="display:none;">
+                    <h2>Advocate Data</h2>
+                    <table id="advocateDataTable" border="1">
+                        <thead>
+                            <tr>
+                                <!-- Headers will be populated dynamically -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Police Data Section -->
+                <div id="policeDataSection" style="display:none;">
+                    <h2>Police Data</h2>
+                    <table id="policeDataTable" border="1">
+                        <thead>
+                            <tr>
+                                <!-- Headers will be populated dynamically -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Truck Associations Data Section -->
+                <div id="truckDataSection" style="display:none;">
+                    <h2>Truck Associations Data</h2>
+                    <table id="truckDataTable" border="1">
+                        <thead>
+                            <tr>
+                                <!-- Headers will be populated dynamically -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- RTO Data Section -->
+                <div id="rtoDataSection" style="display:none;">
+                    <h2>RTO Data</h2>
+                    <table id="rtoDataTable" border="1">
+                        <thead>
+                            <tr>
+                                <!-- Headers will be populated dynamically -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="starlinkSection" style="display:none;">
+                    <section id="starlink-subscription">
+                        <h2>Subscribe to StarLink Plan</h2>
+                        <form id="starlink-form">
+                            <label for="name">Name:</label>
+                            <input type="text" id="name" name="name" required><br><br>
+
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" name="email" required><br><br>
+
+                            <label for="phone">Phone Number:</label>
+                            <input type="tel" id="phone" name="phone" required><br><br>
+
+                            <label for="address">Address:</label>
+                            <textarea id="address" name="address" required></textarea><br><br>
+
+                            <button type="submit">Subscribe</button>
+                        </form>
+                    </section>
+                </div>
+                 <!-- Location Detection Section -->
+                <div id="locationSection" style="display:none;">
+                    <section id="location-detection">
+                        <h2>Detected Location</h2>
+                        <p id="locationInfo">Click the button to detect your location.</p>
+                    </section>
+                </div>
+            </main>
+
+            <footer>
+                <p>&copy; 2024 Chalak Suvidha. All rights reserved.</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- JavaScript for showing and hiding sections based on button clicks -->
+    <script src="index.js"></script>
+</body>
+</html>
