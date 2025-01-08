@@ -3,23 +3,28 @@ const { EWAYBILL_API_URL, EWAYBILL_API_TOKEN, ENVIRONMENT } = require('../config
 
 // Helper function to fetch API token
 const fetchAuthToken = async () => {
-  if (ENVIRONMENT === 'production') {
-    const authResponse = await axios.post(
-      `${EWAYBILL_API_URL}/user/login`,
-      {
-        username: process.env.EWAYBILL_USERNAME,
-        password: process.env.EWAYBILL_PASSWORD,
-      },
-      {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
+  try {
+    if (ENVIRONMENT === 'production') {
+      const authResponse = await axios.post(
+        `${EWAYBILL_API_URL}/user/login`,
+        {
+          username: process.env.EWAYBILL_USERNAME,
+          password: process.env.EWAYBILL_PASSWORD,
+        },
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
         }
-      }
-    );
-    return authResponse.data.token;
+      );
+      return authResponse.data.token;
+    }
+    return EWAYBILL_API_TOKEN; // Use pre-configured token for non-production environments
+  } catch (error) {
+    console.error('Error fetching auth token:', error.message);
+    throw new Error('Failed to fetch authentication token.');
   }
-  return EWAYBILL_API_TOKEN;
 };
 
 // Controller for fetching eWaybill data
@@ -33,7 +38,7 @@ async function getEwaybillData(req, res) {
       response: null,
       error: true,
       code: "400",
-      message: "Invalid ewbNo format. Expected 12-digit number.",
+      message: "Invalid eWaybill number format. Expected a 12-digit numeric value.",
     });
   }
 
@@ -48,30 +53,31 @@ async function getEwaybillData(req, res) {
       { ewbNo },
       {
         headers: {
-          accept: 'application/json',
-          authorization: `Bearer ${token}`,
-          'content-type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       }
     );
 
+    // Send success response
     res.status(200).json({
       response: response.data.response,
       error: false,
       code: "200",
-      message: "Success",
+      message: "eWaybill data fetched successfully.",
     });
   } catch (error) {
     if (error.response) {
-      // Log error details for debugging
+      // Log detailed error for debugging
       console.error(
-        `API Error: Status ${error.response.status}, Message: ${error.response.statusText}`
+        `API Error: Status ${error.response.status}, Message: ${error.response.data?.message || error.response.statusText}`
       );
       res.status(error.response.status).json({
         response: null,
         error: true,
         code: error.response.status.toString(),
-        message: error.response.statusText,
+        message: error.response.data?.message || error.response.statusText,
       });
     } else {
       // Handle network or unexpected errors
@@ -80,7 +86,7 @@ async function getEwaybillData(req, res) {
         response: null,
         error: true,
         code: "502",
-        message: "Server is not responding.",
+        message: "The server is not responding. Please try again later.",
       });
     }
   }
