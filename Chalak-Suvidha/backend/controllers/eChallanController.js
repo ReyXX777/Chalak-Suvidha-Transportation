@@ -3,26 +3,31 @@ const { ECHALLAN_API_URL, ECHALLAN_API_TOKEN, ENVIRONMENT } = require('../config
 
 // Helper function to fetch API token
 const fetchAuthToken = async () => {
-  if (ENVIRONMENT === 'production') {
-    const authResponse = await axios.post(
-      `${ECHALLAN_API_URL}/user/login`,
-      {
-        username: process.env.ECHALLAN_USERNAME,
-        password: process.env.ECHALLAN_PASSWORD,
-      },
-      {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
+  try {
+    if (ENVIRONMENT === 'production') {
+      const authResponse = await axios.post(
+        `${ECHALLAN_API_URL}/user/login`,
+        {
+          username: process.env.ECHALLAN_USERNAME,
+          password: process.env.ECHALLAN_PASSWORD,
+        },
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
         }
-      }
-    );
-    return authResponse.data.token;
+      );
+      return authResponse.data.token;
+    }
+    return ECHALLAN_API_TOKEN; // Use pre-configured token for non-production environments
+  } catch (error) {
+    console.error('Error fetching auth token:', error.message);
+    throw new Error('Failed to fetch authentication token.');
   }
-  return ECHALLAN_API_TOKEN;
 };
 
-// Controller to get EChallan Data
+// Controller to get eChallan Data
 async function getEChallanData(req, res) {
   const { vehicleNumber } = req.body;
 
@@ -33,7 +38,7 @@ async function getEChallanData(req, res) {
       response: null,
       error: true,
       code: "400",
-      message: "Invalid vehicleNumber format. Expected format: ^[a-zA-Z0-9]{5,11}$",
+      message: "Invalid vehicleNumber format. Please provide 5-11 alphanumeric characters.",
     });
   }
 
@@ -55,23 +60,24 @@ async function getEChallanData(req, res) {
       }
     );
 
+    // Respond with the successful API response
     res.status(200).json({
       response: response.data.response,
       error: false,
       code: "200",
-      message: "Success",
+      message: "eChallan data fetched successfully.",
     });
   } catch (error) {
     if (error.response) {
       // Log the error for debugging
       console.error(
-        `API Error: Status ${error.response.status}, Message: ${error.response.statusText}`
+        `API Error: Status ${error.response.status}, Message: ${error.response.data?.message || error.response.statusText}`
       );
       res.status(error.response.status).json({
         response: null,
         error: true,
         code: error.response.status.toString(),
-        message: error.response.statusText,
+        message: error.response.data?.message || error.response.statusText,
       });
     } else {
       console.error('Network Error:', error.message);
@@ -79,7 +85,7 @@ async function getEChallanData(req, res) {
         response: null,
         error: true,
         code: "502",
-        message: "Server is not responding.",
+        message: "The server is not responding. Please try again later.",
       });
     }
   }
