@@ -1,5 +1,14 @@
+
 const axios = require('axios');
+const NodeCache = require('node-cache');
+const { RateLimiter } = require('limiter');
 const { VAHAN_API_URL, VAHAN_API_TOKEN } = require('../config/apiConfig');
+
+// Initialize cache with a TTL of 1 hour
+const cache = new NodeCache({ stdTTL: 3600 });
+
+// Initialize rate limiter to allow 10 requests per second
+const limiter = new RateLimiter({ tokensPerInterval: 10, interval: 'second' });
 
 /**
  * Fetches vehicle data based on the engine number.
@@ -21,6 +30,21 @@ async function getVehicleData(req, res) {
   }
 
   try {
+    // Check if the response is cached
+    const cachedResponse = cache.get(enginenumber);
+    if (cachedResponse) {
+      console.log(`✅ Serving cached response for engine number: ${enginenumber}`);
+      return res.status(200).json({
+        response: cachedResponse,
+        error: false,
+        code: "200",
+        message: "Success (cached)"
+      });
+    }
+
+    // Apply rate limiting
+    await limiter.removeTokens(1);
+
     // Send POST request to the VAHAN API
     const response = await axios.post(
       `${VAHAN_API_URL}/VAHAN/03`,
@@ -30,9 +54,14 @@ async function getVehicleData(req, res) {
           'accept': 'application/json',
           'authorization': `Bearer ${VAHAN_API_TOKEN}`,
           'content-type': 'application/json'
-        }
+        },
+        timeout: 5000 // Set a 5-second timeout for the request
       }
     );
+
+    // Cache the response
+    cache.set(enginenumber, response.data.response);
+    console.log(`✅ Fetched and cached response for engine number: ${enginenumber}`);
 
     // Respond with success
     res.status(200).json({
