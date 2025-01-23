@@ -1,5 +1,10 @@
+
 const axios = require('axios');
+const { RateLimiter } = require('limiter');
 const { DIGILOCKER_API_URL, DIGILOCKER_API_TOKEN, ENVIRONMENT } = require('../config/apiConfig');
+
+// Initialize rate limiter to allow 10 requests per second
+const limiter = new RateLimiter({ tokensPerInterval: 10, interval: 'second' });
 
 /**
  * Retrieves the API token, either from the environment or by authenticating.
@@ -18,6 +23,7 @@ const getToken = async () => {
                         Accept: 'application/json',
                         'Content-Type': 'application/json',
                     },
+                    timeout: 5000, // Set a 5-second timeout for the request
                 }
             );
             return authResponse.data.token;
@@ -30,10 +36,13 @@ const getToken = async () => {
 };
 
 /**
- * Makes an API request with error handling.
+ * Makes an API request with error handling, rate limiting, and timeout.
  */
 const makeApiRequest = async (url, data, token, res, successMessage) => {
     try {
+        // Apply rate limiting
+        await limiter.removeTokens(1);
+
         const response = await axios.post(
             url,
             data,
@@ -43,6 +52,7 @@ const makeApiRequest = async (url, data, token, res, successMessage) => {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
+                timeout: 5000, // Set a 5-second timeout for the request
             }
         );
         res.status(200).json({
