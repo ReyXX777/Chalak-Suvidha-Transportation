@@ -1,33 +1,45 @@
+
 require('dotenv').config();
 
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=secret
-DB_NAME=chalak_suvidha_db
+function validateEnvVariables() {
+    const requiredEnvVars = [
+        'DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME',
+        'VAHAN_API_URL', 'VAHAN_API_TOKEN',
+        'SARATHI_API_URL', 'SARATHI_API_TOKEN',
+        'FASTAG_API_URL', 'FASTAG_API_TOKEN',
+        'ECHALLAN_API_URL', 'ECHALLAN_API_TOKEN',
+        'EWAYBILL_API_URL', 'EWAYBILL_API_TOKEN',
+        'GST_API_URL', 'GST_API_TOKEN', 'GST_USERNAME', 'GST_PASSWORD',
+        'DIGILOCKER_API_URL', 'DIGILOCKER_API_TOKEN', 'DIGILOCKER_USERNAME', 'DIGILOCKER_PASSWORD'
+    ];
 
-VAHAN_API_URL=https://www.ulip.dpiit.gov.in/ulip/v1.0.0
-VAHAN_API_TOKEN=your_token_here
+    requiredEnvVars.forEach((envVar) => {
+        if (!process.env[envVar]) {
+            console.error(`❌ Missing required environment variable: ${envVar}`);
+            process.exit(1);
+        }
+    });
 
-SARATHI_API_URL=https://www.ulip.dpiit.gov.in/ulip/v1.0.0
-SARATHI_API_TOKEN=your_token_here
+    console.log('✅ All required environment variables are present.');
+}
 
-FASTAG_API_URL=https://www.ulip.dpiit.gov.in/ulip/v1.0.0
-FASTAG_API_TOKEN=your_token_here
+function logEnvironment() {
+    console.log('Environment Configuration:');
+    console.log(`- DB_HOST: ${process.env.DB_HOST}`);
+    console.log(`- DB_USER: ${process.env.DB_USER}`);
+    console.log(`- DB_NAME: ${process.env.DB_NAME}`);
+    console.log(`- ENVIRONMENT: ${process.env.ENVIRONMENT}`);
+    console.log(`- VAHAN_API_URL: ${process.env.VAHAN_API_URL}`);
+    console.log(`- SARATHI_API_URL: ${process.env.SARATHI_API_URL}`);
+    console.log(`- FASTAG_API_URL: ${process.env.FASTAG_API_URL}`);
+    console.log(`- ECHALLAN_API_URL: ${process.env.ECHALLAN_API_URL}`);
+    console.log(`- EWAYBILL_API_URL: ${process.env.EWAYBILL_API_URL}`);
+    console.log(`- GST_API_URL: ${process.env.GST_API_URL}`);
+    console.log(`- DIGILOCKER_API_URL: ${process.env.DIGILOCKER_API_URL}`);
+}
 
-ECHALLAN_API_URL=https://www.ulipstaging.dpiit.gov.in/ulip/v1.0.0
-ECHALLAN_API_TOKEN=your_token_here
+// Validate environment variables
+validateEnvVariables();
 
-EWAYBILL_API_URL=https://www.ulipstaging.dpiit.gov.in/ulip/v1.0.0
-EWAYBILL_API_TOKEN=your_token_here
-
-GST_API_URL=https://www.ulipstaging.dpiit.gov.in/ulip/v1.0.0
-GST_API_TOKEN=your_token_here
-GST_USERNAME=your_username_here
-GST_PASSWORD=your_password_here
-
-DIGILOCKER_API_URL=https://www.ulipstaging.dpiit.gov.in/ulip/v1.0.0
-DIGILOCKER_API_TOKEN=your_token_here
-DIGILOCKER_USERNAME=your_username_here
-DIGILOCKER_PASSWORD=your_password_here
-
-ENVIRONMENT=staging # or production
+// Log environment configuration
+logEnvironment();
