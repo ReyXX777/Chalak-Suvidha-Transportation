@@ -1,5 +1,14 @@
+
 const axios = require('axios');
+const NodeCache = require('node-cache');
+const { RateLimiter } = require('limiter');
 const { GST_API_URL, GST_API_TOKEN, ENVIRONMENT } = require('../config/apiConfig');
+
+// Initialize cache with a TTL of 1 hour
+const cache = new NodeCache({ stdTTL: 3600 });
+
+// Initialize rate limiter to allow 10 requests per second
+const limiter = new RateLimiter({ tokensPerInterval: 10, interval: 'second' });
 
 // Helper function to fetch API token
 const fetchAuthToken = async () => {
@@ -14,7 +23,8 @@ const fetchAuthToken = async () => {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
-        }
+        },
+        timeout: 5000, // Set a 5-second timeout for the request
       }
     );
     return authResponse.data.token;
@@ -40,6 +50,21 @@ async function getGstData(req, res) {
   const apiUrl = `${GST_API_URL}/GST/01`;
 
   try {
+    // Check if the response is cached
+    const cachedResponse = cache.get(gstin);
+    if (cachedResponse) {
+      console.log(`✅ Serving cached response for GSTIN: ${gstin}`);
+      return res.status(200).json({
+        response: cachedResponse,
+        error: false,
+        code: "200",
+        message: "Success (cached)",
+      });
+    }
+
+    // Apply rate limiting
+    await limiter.removeTokens(1);
+
     const token = await fetchAuthToken(); // Fetch token based on environment
 
     // Make API request
@@ -52,8 +77,13 @@ async function getGstData(req, res) {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        timeout: 5000, // Set a 5-second timeout for the request
       }
     );
+
+    // Cache the response
+    cache.set(gstin, response.data.response);
+    console.log(`✅ Fetched and cached response for GSTIN: ${gstin}`);
 
     res.status(200).json({
       response: response.data.response,
