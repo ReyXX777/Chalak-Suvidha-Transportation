@@ -1,5 +1,14 @@
+
 const axios = require('axios');
+const NodeCache = require('node-cache');
+const { RateLimiter } = require('limiter');
 const { FASTAG_API_URL, FASTAG_API_TOKEN } = require('../config/apiConfig');
+
+// Initialize cache with a TTL of 10 minutes
+const cache = new NodeCache({ stdTTL: 600 });
+
+// Initialize rate limiter to allow 10 requests per second
+const limiter = new RateLimiter({ tokensPerInterval: 10, interval: 'second' });
 
 // Helper function to validate input fields
 const validateInput = (fieldName, value, regex, res, errorMessage) => {
@@ -26,6 +35,21 @@ async function getFastagDataByVehicleNumber(req, res) {
   }
 
   try {
+    // Check if the response is cached
+    const cachedResponse = cache.get(vehiclenumber);
+    if (cachedResponse) {
+      console.log(`✅ Serving cached response for vehicleNumber: ${vehiclenumber}`);
+      return res.status(200).json({
+        response: cachedResponse,
+        error: false,
+        code: "200",
+        message: "Success (cached)",
+      });
+    }
+
+    // Apply rate limiting
+    await limiter.removeTokens(1);
+
     const response = await axios.post(
       `${FASTAG_API_URL}/FASTAG/01`,
       { vehiclenumber },
@@ -35,8 +59,13 @@ async function getFastagDataByVehicleNumber(req, res) {
           'authorization': `Bearer ${FASTAG_API_TOKEN}`,
           'content-type': 'application/json',
         },
+        timeout: 5000, // Set a 5-second timeout for the request
       }
     );
+
+    // Cache the response
+    cache.set(vehiclenumber, response.data.response);
+    console.log(`✅ Fetched and cached response for vehicleNumber: ${vehiclenumber}`);
 
     res.status(200).json({
       response: response.data.response,
@@ -85,6 +114,9 @@ async function getFastagDataByVehicleNumberOrTagId(req, res) {
   }
 
   try {
+    // Apply rate limiting
+    await limiter.removeTokens(1);
+
     const response = await axios.post(
       `${FASTAG_API_URL}/FASTAG/02`,
       { vehiclenumber, tagid },
@@ -94,6 +126,7 @@ async function getFastagDataByVehicleNumberOrTagId(req, res) {
           'authorization': `Bearer ${FASTAG_API_TOKEN}`,
           'content-type': 'application/json',
         },
+        timeout: 5000, // Set a 5-second timeout for the request
       }
     );
 
