@@ -1,5 +1,10 @@
+
 const axios = require('axios');
+const NodeCache = require('node-cache');
 const { SARATHI_API_URL, SARATHI_API_TOKEN } = require('../config/apiConfig');
+
+// Initialize cache with a TTL of 1 hour
+const cache = new NodeCache({ stdTTL: 3600 });
 
 // Helper function to validate inputs
 const validateInput = (fieldName, value, regex, res, errorMessage) => {
@@ -30,25 +35,57 @@ async function getDrivingLicenseData(req, res) {
     return;
   }
 
-  try {
-    const response = await axios.post(
-      `${SARATHI_API_URL}/SARATHI/01`,
-      { dlnumber, dob },
-      {
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${SARATHI_API_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+  // Generate a unique cache key
+  const cacheKey = `${dlnumber}-${dob}`;
 
-    res.status(200).json({
-      response: response.data.response,
-      error: false,
-      code: "200",
-      message: "Success",
-    });
+  try {
+    // Check if the response is cached
+    const cachedResponse = cache.get(cacheKey);
+    if (cachedResponse) {
+      console.log(`✅ Serving cached response for DL Number: ${dlnumber}`);
+      return res.status(200).json({
+        response: cachedResponse,
+        error: false,
+        code: "200",
+        message: "Success (cached)",
+      });
+    }
+
+    // Make API request with retry mechanism
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        const response = await axios.post(
+          `${SARATHI_API_URL}/SARATHI/01`,
+          { dlnumber, dob },
+          {
+            headers: {
+              Accept: 'application/json',
+              Authorization: `Bearer ${SARATHI_API_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+            timeout: 5000, // Set a 5-second timeout for the request
+          }
+        );
+
+        // Cache the response
+        cache.set(cacheKey, response.data.response);
+        console.log(`✅ Fetched and cached response for DL Number: ${dlnumber}`);
+
+        return res.status(200).json({
+          response: response.data.response,
+          error: false,
+          code: "200",
+          message: "Success",
+        });
+      } catch (error) {
+        retries--;
+        if (retries === 0) {
+          throw error; // Throw error if all retries fail
+        }
+        console.warn(`⚠️ Retrying API request for DL Number: ${dlnumber}. Attempts left: ${retries}`);
+      }
+    }
   } catch (error) {
     handleError(error, res);
   }
