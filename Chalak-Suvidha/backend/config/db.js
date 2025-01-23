@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 
 /**
@@ -13,10 +14,13 @@ const connectDB = async () => {
     }
 
     try {
-        // Connect to MongoDB
+        // Connect to MongoDB with timeout and retry logic
         const conn = await mongoose.connect(mongoURI, {
             useNewUrlParser: true,      // Parses MongoDB connection strings properly
             useUnifiedTopology: true,  // Handles MongoDB topology changes
+            connectTimeoutMS: 5000,    // Timeout after 5 seconds
+            retryWrites: true,         // Enable retryable writes
+            retryReads: true,          // Enable retryable reads
         });
         console.log(`✅ MongoDB connected: ${conn.connection.host}`);
     } catch (error) {
