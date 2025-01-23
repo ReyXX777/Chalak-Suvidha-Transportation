@@ -1,22 +1,46 @@
+// Commit: Added request caching and retry mechanism for API calls
+
 // controllers/dataController.js
 const axios = require('axios');
 const apiConfig = require('../config/apiConfig');
+const NodeCache = require('node-cache');
 
-// Helper function to fetch API data with token
-const getApiData = async (url, token, errorMessage) => {
+// Initialize cache with a TTL of 5 minutes
+const cache = new NodeCache({ stdTTL: 300 });
+
+// Helper function to fetch API data with token, caching, and retry mechanism
+const getApiData = async (url, token, errorMessage, retries = 3) => {
     try {
         if (!token) {
             throw new Error(`Missing API token for URL: ${url}`);
         }
+
+        // Check if the response is cached
+        const cachedResponse = cache.get(url);
+        if (cachedResponse) {
+            console.log(`✅ Serving cached response for ${url}`);
+            return cachedResponse;
+        }
+
         const response = await axios.get(url, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         });
+
+        // Cache the response
+        cache.set(url, response.data);
+        console.log(`✅ Fetched and cached response for ${url}`);
+
         return response.data;
     } catch (error) {
-        console.error(`${new Date().toISOString()} - ${errorMessage}`, error.message);
-        throw new Error(`${errorMessage}. Details: ${error.message}`);
+        if (retries > 0) {
+            console.warn(`⚠️ Retrying ${url}... Attempts left: ${retries}`);
+            return getApiData(url, token, errorMessage, retries - 1);
+        } else {
+            console.error(`${new Date().toISOString()} - ${errorMessage}`, error.message);
+            throw new Error(`${errorMessage}. Details: ${error.message}`);
+        }
     }
 };
 
