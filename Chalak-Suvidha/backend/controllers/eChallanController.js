@@ -1,5 +1,10 @@
+
 const axios = require('axios');
+const NodeCache = require('node-cache');
 const { ECHALLAN_API_URL, ECHALLAN_API_TOKEN, ENVIRONMENT } = require('../config/apiConfig');
+
+// Initialize cache with a TTL of 10 minutes
+const cache = new NodeCache({ stdTTL: 600 });
 
 // Helper function to fetch API token
 const fetchAuthToken = async () => {
@@ -16,6 +21,7 @@ const fetchAuthToken = async () => {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
+          timeout: 5000, // Set a 5-second timeout for the request
         }
       );
       return authResponse.data.token;
@@ -45,28 +51,56 @@ async function getEChallanData(req, res) {
   const apiUrl = `${ECHALLAN_API_URL}/ECHALLAN/01`;
 
   try {
+    // Check if the response is cached
+    const cachedResponse = cache.get(vehicleNumber);
+    if (cachedResponse) {
+      console.log(`✅ Serving cached response for vehicleNumber: ${vehicleNumber}`);
+      return res.status(200).json({
+        response: cachedResponse,
+        error: false,
+        code: "200",
+        message: "eChallan data fetched successfully (cached).",
+      });
+    }
+
     const token = await fetchAuthToken(); // Get the appropriate token
 
-    // Make the API request
-    const response = await axios.post(
-      apiUrl,
-      { vehicleNumber },
-      {
-        headers: {
-          accept: 'application/json',
-          authorization: `Bearer ${token}`,
-          'content-type': 'application/json',
-        },
-      }
-    );
+    // Make the API request with retry mechanism
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        const response = await axios.post(
+          apiUrl,
+          { vehicleNumber },
+          {
+            headers: {
+              accept: 'application/json',
+              authorization: `Bearer ${token}`,
+              'content-type': 'application/json',
+            },
+            timeout: 5000, // Set a 5-second timeout for the request
+          }
+        );
 
-    // Respond with the successful API response
-    res.status(200).json({
-      response: response.data.response,
-      error: false,
-      code: "200",
-      message: "eChallan data fetched successfully.",
-    });
+        // Cache the response
+        cache.set(vehicleNumber, response.data.response);
+        console.log(`✅ Fetched and cached response for vehicleNumber: ${vehicleNumber}`);
+
+        // Respond with the successful API response
+        return res.status(200).json({
+          response: response.data.response,
+          error: false,
+          code: "200",
+          message: "eChallan data fetched successfully.",
+        });
+      } catch (error) {
+        retries--;
+        if (retries === 0) {
+          throw error; // Throw error if all retries fail
+        }
+        console.warn(`⚠️ Retrying API request for vehicleNumber: ${vehicleNumber}. Attempts left: ${retries}`);
+      }
+    }
   } catch (error) {
     if (error.response) {
       // Log the error for debugging
