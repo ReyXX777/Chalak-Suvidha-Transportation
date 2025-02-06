@@ -43,6 +43,31 @@ const fetchApiData = async (url, token = null) => {
     }
 };
 
+/**
+ * Clears the cache for a specific URL or the entire cache if no URL is provided.
+ * @param {string} [url] - Optional URL to clear from the cache.
+ */
+const clearCache = (url = null) => {
+    if (url) {
+        cache.del(url);
+        console.log(`✅ Cleared cache for ${url}`);
+    } else {
+        cache.flushAll();
+        console.log('✅ Cleared entire cache');
+    }
+};
+
+/**
+ * Sets a custom TTL (Time-To-Live) for the cache.
+ * @param {number} ttl - The TTL in seconds.
+ */
+const setCacheTTL = (ttl) => {
+    cache.options.stdTTL = ttl;
+    console.log(`✅ Cache TTL set to ${ttl} seconds`);
+};
+
 module.exports = {
     fetchApiData,
+    clearCache,
+    setCacheTTL,
 };
