@@ -1,4 +1,3 @@
-
 const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -98,6 +97,55 @@ exports.refreshToken = async (req, res) => {
         res.status(200).json({ accessToken });
     } catch (error) {
         console.error('Error during token refresh:', error.message);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// Added: Middleware to verify access token
+exports.verifyToken = (req, res, next) => {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+
+    if (!token) {
+        return res.status(401).json({ message: 'Access token is required' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.userId = decoded.id;
+        next();
+    } catch (error) {
+        console.error('Error verifying token:', error.message);
+        res.status(401).json({ message: 'Invalid or expired token' });
+    }
+};
+
+// Added: Function to reset user password
+exports.resetPassword = async (req, res) => {
+    try {
+        const { email, newPassword } = req.body;
+
+        // Validate password strength
+        if (!validatePasswordStrength(newPassword)) {
+            return res.status(400).json({
+                message:
+                    'Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
+            });
+        }
+
+        // Find the user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
+        }
+
+        // Hash the new password and update
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        res.status(200).json({ message: 'Password reset successfully' });
+    } catch (error) {
+        console.error('Error during password reset:', error.message);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
