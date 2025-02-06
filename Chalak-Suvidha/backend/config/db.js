@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 /**
@@ -21,6 +20,8 @@ const connectDB = async () => {
             connectTimeoutMS: 5000,    // Timeout after 5 seconds
             retryWrites: true,         // Enable retryable writes
             retryReads: true,          // Enable retryable reads
+            maxPoolSize: 10,           // Added: Maximum number of connections in the pool
+            socketTimeoutMS: 45000,    // Added: Close sockets after 45 seconds of inactivity
         });
         console.log(`✅ MongoDB connected: ${conn.connection.host}`);
     } catch (error) {
