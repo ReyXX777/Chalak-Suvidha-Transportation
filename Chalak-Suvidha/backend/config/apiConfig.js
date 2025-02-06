@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 
 function getEnvVariable(key, defaultValue = null) {
@@ -15,5 +14,7 @@ module.exports = {
     DB_NAME: getEnvVariable('DB_NAME'),
     ENVIRONMENT: getEnvVariable('ENVIRONMENT', 'development'),
     PORT: getEnvVariable('PORT', 3000), // Added PORT with a default value of 3000
-    API_KEY: getEnvVariable('API_KEY') // Added API_KEY as a required environment variable
+    API_KEY: getEnvVariable('API_KEY'), // Added API_KEY as a required environment variable
+    JWT_SECRET: getEnvVariable('JWT_SECRET', 'default_jwt_secret'), // Added JWT_SECRET with a default value
+    LOG_LEVEL: getEnvVariable('LOG_LEVEL', 'info') // Added LOG_LEVEL with a default value of 'info'
 };
